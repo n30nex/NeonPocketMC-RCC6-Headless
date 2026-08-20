@@ -251,6 +251,10 @@ static bool beginSpiffsPreservingData() {
 
 void setup() {
   Serial.begin(115200);
+#ifdef NEONPOCKET_HEADLESS
+  Serial.println("NeonPocketMC RCC6 Headless " NEONPOCKET_HEADLESS_VERSION
+      " mode=" NEONPOCKET_HEADLESS_MODE);
+#endif
 #ifdef RC52_STARTUP_DIAGNOSTICS
   delay(2500);
   Serial.println("RC52_DIAG stage=serial-ready");
@@ -454,6 +458,23 @@ void setup() {
 #endif
 
   the_mesh.startInterface(interface_manager);
+#if defined(NEONPOCKET_HEADLESS) && defined(BLE_PIN_CODE)
+  Serial.printf("NeonPocket Headless BLE PIN: %06lu\n",
+      static_cast<unsigned long>(the_mesh.getBLEPin()));
+#endif
+#if defined(NEONPOCKET_HEADLESS) && defined(RCC6_WEB_AP)
+  if (web_interface.isStationMode()) {
+    Serial.printf("NeonPocket Headless Web: http://%s/ on %s\n",
+        web_interface.getCurrentIP().toString().c_str(),
+        web_interface.getCurrentSsid());
+  } else {
+    Serial.printf("NeonPocket Headless setup AP: %s\n", web_interface.getApSsid());
+    Serial.printf("NeonPocket Headless setup password: %s\n",
+        web_interface.getApPassword());
+    Serial.printf("NeonPocket Headless setup URL: http://%s/\n",
+        web_interface.getApIP().toString().c_str());
+  }
+#endif
   sensors.begin();
 
 #if defined(DISPLAY_CLASS) && defined(NEONPOCKET_ULTIMATE)

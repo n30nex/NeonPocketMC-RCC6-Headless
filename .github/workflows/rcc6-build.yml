@@ -1,4 +1,4 @@
-name: RCC6 Companion Build
+name: RCC6 Headless Companion Build
 
 on:
   workflow_dispatch:
@@ -29,6 +29,9 @@ jobs:
       - name: Set up build environment
         uses: ./.github/actions/setup-build-environment
 
+      - name: Verify headless target contract
+        run: python scripts/verify_rcc6_headless.py
+
       - name: Run upstream unit tests
         run: pio test -e native -e native_kiss_modem -vv
 
@@ -47,9 +50,6 @@ jobs:
         shell: bash
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
 
-      - name: Verify demo-scene splash contract
-        run: python ../ui-new/verify_demoscene_splash.py
-
       - name: Build and verify embedded WebUI
         run: |
           npm ci
@@ -62,22 +62,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - environment: heltec_rcc6_companion_radio_ble
-            ultimate: false
-            ota: false
-          - environment: heltec_rcc6_companion_radio_web_ap
-            ultimate: false
-            ota: false
-          - environment: heltec_rcc6_ultimate_companion_ble
-            ultimate: true
-            ota: false
-          - environment: heltec_rcc6_ultimate_companion_usb
-            ultimate: true
-            ota: false
-          - environment: heltec_rcc6_ultimate_companion_web
-            ultimate: true
-            ota: true
+        environment:
+          - heltec_rcc6_headless_companion_ble
+          - heltec_rcc6_headless_companion_usb
+          - heltec_rcc6_headless_companion_web
+          - heltec_rcc6_ultimate_companion_ble
 
     steps:
       - name: Check out exact source
@@ -110,76 +99,23 @@ jobs:
           out=".pio/build/${{ matrix.environment }}"
           test -s "$out/firmware.bin"
           test -s "$out/firmware-merged.bin"
-          test -s "$out/firmware.elf"
-          test -s "$out/bootloader.bin"
-          test -s "$out/partitions.bin"
           python - "$out/firmware.bin" <<'PY'
           import pathlib, sys
           image = pathlib.Path(sys.argv[1]).read_bytes()
           assert len(image) > 4 and image[0] == 0xE9, "not an ESP application image"
           assert image[2] == 0x02, "RCC6 application image is not DIO"
           PY
-          sha256sum \
-            "$out/firmware.bin" \
-            "$out/firmware-merged.bin" \
-            "$out/firmware.elf" \
-            "$out/bootloader.bin" \
-            "$out/partitions.bin" \
-            > "$out/SHA256SUMS"
+          sha256sum "$out/firmware.bin" "$out/firmware-merged.bin" > "$out/SHA256SUMS"
 
-      - name: Verify Ultimate budgets and markers
-        if: matrix.ultimate
+      - name: Verify headless artifact markers
+        if: startsWith(matrix.environment, 'heltec_rcc6_headless_')
         shell: bash
         run: |
           out=".pio/build/${{ matrix.environment }}"
-          python tools/verify_ultimate_source.py
-          python tools/verify_ultimate_artifact.py \
-            --app "$out/firmware.bin" \
-            --merged "$out/firmware-merged.bin" \
-            --bootloader "$out/bootloader.bin" \
-            --partitions "$out/partitions.bin" \
-            --elf "$out/firmware.elf" \
-            --sha "${{ github.event.pull_request.head.sha || github.sha }}" \
-            --version 2.3.0-rc.3
-
-      - name: Build and verify signed Ultimate Web package
-        if: matrix.ota && github.event_name != 'pull_request'
-        shell: bash
-        env:
-          ULTIMATE_OTA_SIGNING_KEY_PEM: ${{ secrets.ULTIMATE_OTA_SIGNING_KEY_PEM }}
-        run: |
-          test -n "$ULTIMATE_OTA_SIGNING_KEY_PEM"
-          out=".pio/build/${{ matrix.environment }}"
-          key="$RUNNER_TEMP/ultimate-ota-private.pem"
-          printf '%s\n' "$ULTIMATE_OTA_SIGNING_KEY_PEM" > "$key"
-          chmod 600 "$key"
-          package="$out/NeonPocketMC-RCC6-Ultimate-Web-v2.3.0-rc.3.npu"
-          python tools/package_ultimate_ota.py pack \
-            --app "$out/firmware.bin" --output "$package" --key "$key" \
-            --version 2.3.0-rc.3 \
-            --git-sha "${{ github.event.pull_request.head.sha || github.sha }}"
-          rm -f "$key"
-          python tools/package_ultimate_ota.py verify \
-            --package "$package" --public-key tools/ultimate_ota_public.pem
-          python tools/package_ultimate_ota.py self-test
-          cp "$package" "$RUNNER_TEMP/corrupted.npu"
-          python - "$RUNNER_TEMP/corrupted.npu" <<'PY'
-          from pathlib import Path
-          import sys
-          path = Path(sys.argv[1])
-          blob = bytearray(path.read_bytes())
-          blob[-1] ^= 1
-          path.write_bytes(blob)
-          PY
-          ! python tools/package_ultimate_ota.py verify \
-            --package "$RUNNER_TEMP/corrupted.npu" \
-            --public-key tools/ultimate_ota_public.pem
-          ! python tools/package_ultimate_ota.py verify \
-            --package "$package" --public-key tools/ultimate_ota_public.pem \
-            --target wrong_board
-          sha256sum "$package" >> "$out/SHA256SUMS"
+          grep -aFq 'NeonPocketMC RCC6 Headless 1.0.0-rc.1 mode=' "$out/firmware.bin"
 
       - name: Upload exact firmware candidate
+        if: startsWith(matrix.environment, 'heltec_rcc6_headless_')
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.environment }}-${{ github.event.pull_request.head.sha || github.sha }}
@@ -192,4 +128,3 @@ jobs:
             .pio/build/${{ matrix.environment }}/bootloader.bin
             .pio/build/${{ matrix.environment }}/partitions.bin
             .pio/build/${{ matrix.environment }}/SHA256SUMS
-            .pio/build/${{ matrix.environment }}/*.npu

@@ -1062,13 +1062,19 @@ function drawUltimateChart(canvas, rows, keys, colors) {
   keys.forEach((key, series) => {
     ctx.strokeStyle = colors[series]; ctx.lineWidth = series ? 1.6 : 2.4;
     ctx.shadowColor = colors[series]; ctx.shadowBlur = series ? 4 : 9; ctx.beginPath();
+    let drawing = false;
     ordered.forEach((row, index) => {
       const x = index * width / (ordered.length - 1);
-      const raw = Number(row[key]) || 0;
+      const raw = Number(row[key]);
+      if (!Number.isFinite(raw) || (key === "battery" && raw <= 0)) {
+        drawing = false;
+        return;
+      }
       const scaled = key === "battery" ? Math.max(0, Math.min(1, (raw - 3000) / 1200))
                                         : raw / trafficMaximum;
       const y = height - 10 - scaled * (height - 26);
-      index ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      drawing ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      drawing = true;
     });
     ctx.stroke(); ctx.shadowBlur = 0;
   });
@@ -1089,7 +1095,9 @@ function renderUltimate() {
   text("ultimate-queue", `outbound ${ultimate.queueDepth || 0} · air ${Math.round((ultimate.airtimeMs || 0) / 60000)}m`);
   const profileNames = ["BALANCED", "FIELD", "BATTERY"];
   const trend = Number(ultimate.batteryTrendMvPerHour || 0);
-  text("ultimate-battery", `${((ultimate.batteryMv || 0) / 1000).toFixed(2)} V · ${trend > 0 ? "+" : ""}${trend} mV/h`);
+  text("ultimate-battery", ultimate.batteryMv > 0
+    ? `${(ultimate.batteryMv / 1000).toFixed(2)} V · ${trend > 0 ? "+" : ""}${trend} mV/h`
+    : "—");
   text("ultimate-runtime", ultimate.usbHostConnected
     ? "USB host connected · unplug to start a clean discharge window"
     : ultimate.batteryRuntimeMinutes > 0
@@ -1155,6 +1163,8 @@ function renderAll() {
   if (state.battery) {
     const volts = `${(state.battery / 1000).toFixed(2)} V`;
     text("battery-chip", volts);
+  } else {
+    text("battery-chip", "—");
   }
   renderHome(); renderMessages(); renderNearby(); renderRadio(); renderNetwork(); renderUltimate(); renderMore();
 }

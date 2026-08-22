@@ -361,12 +361,20 @@ void UltimateWebApi::handleLocation() {
     sendJson(400, F("{\"error\":\"invalid-location\"}")); return;
   }
   extractNumber(body, "accuracy", accuracy);
+  bool advertise = false;
+  const bool has_advertise = extractBool(body, "advertise", advertise);
   sensors.node_lat = latitude;
   sensors.node_lon = longitude;
+  if (has_advertise) {
+    the_mesh.getNodePrefs()->advert_loc_policy = advertise ? ADVERT_LOC_SHARE : ADVERT_LOC_NONE;
+  }
   the_mesh.savePrefs();
   String json = F("{\"saved\":true,\"latitude\":"); json += String(latitude, 6);
   json += F(",\"longitude\":"); json += String(longitude, 6);
-  json += F(",\"accuracy\":"); json += String(accuracy, 1); json += '}';
+  json += F(",\"accuracy\":"); json += String(accuracy, 1);
+  json += F(",\"advertise\":");
+  json += (the_mesh.getNodePrefs()->advert_loc_policy == ADVERT_LOC_NONE ? F("false") : F("true"));
+  json += '}';
   sendJson(200, json);
 }
 

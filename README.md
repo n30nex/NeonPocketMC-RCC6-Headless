@@ -6,6 +6,8 @@
 
 Screenless MeshCore companion firmware for the Heltec RadioCore RCC6-L62/SX1262. Choose one transport: Bluetooth, native USB/serial, or Wi-Fi Web/TCP.
 
+Current experimental release: [`v1.0.0-rc.2`](https://github.com/n30nex/NeonPocketMC-RCC6-Headless/releases/tag/v1.0.0-rc.2).
+
 > **RCC6-L62 only. Do not flash RC52, RC32, T114, Heltec V3/V4, or an RCC6 with different radio hardware.**
 
 **Guided install:** [flasher.canadaverse.org](https://flasher.canadaverse.org/)
@@ -49,6 +51,8 @@ On first boot the device starts a WPA-protected setup network named `MeshCore-<n
 5. After restart, the USB console prints the assigned LAN address.
 
 The Web interface is authenticated on the LAN. TCP port **5000** remains enabled for standard MeshCore companion clients.
+
+The browser-location action asks separately whether the saved coordinates should be included in MeshCore adverts. The confirmation states whether the location will be shared or kept private; it never enables sharing in the background.
 
 > **Trusted-LAN warning:** TCP/5000 provides the full companion/admin protocol without HTTP authentication. Any client that can reach that port must be trusted.
 

@@ -1346,12 +1346,14 @@ $("ultimate-clear").addEventListener("click", async () => {
 
 async function saveBrowserLocation(latitude, longitude, accuracy) {
   text("ultimate-location-preview", `${latitude.toFixed(6)}, ${longitude.toFixed(6)} · ±${Math.round(accuracy)} m`);
-  if (!confirm(`Save this location to MeshCore?\n\n${latitude.toFixed(6)}, ${longitude.toFixed(6)}\nAccuracy ±${Math.round(accuracy)} m`)) return;
+  const advertise = $("ultimate-location-share").checked;
+  const sharing = advertise ? "This location WILL be included in adverts." : "This location will remain private.";
+  if (!confirm(`Save this location to MeshCore?\n\n${latitude.toFixed(6)}, ${longitude.toFixed(6)}\nAccuracy ±${Math.round(accuracy)} m\n\n${sharing}`)) return;
   await ultimateFetch("/api/ultimate/location", {
     method: "PUT", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ latitude, longitude, accuracy }),
+    body: JSON.stringify({ latitude, longitude, accuracy, advertise }),
   });
-  toast("MeshCore location saved");
+  toast(advertise ? "Location saved and enabled for adverts" : "Location saved privately");
 }
 
 $("ultimate-location").addEventListener("click", () => {

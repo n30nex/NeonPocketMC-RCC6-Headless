@@ -50,6 +50,8 @@ On first boot the device starts a WPA-protected setup network named `MeshCore-<n
 
 The Web interface is authenticated on the LAN. TCP port **5000** remains enabled for standard MeshCore companion clients.
 
+The browser-location action asks separately whether the saved coordinates should be included in MeshCore adverts. The confirmation states whether the location will be shared or kept private; it never enables sharing in the background.
+
 > **Trusted-LAN warning:** TCP/5000 provides the full companion/admin protocol without HTTP authentication. Any client that can reach that port must be trusted.
 
 ## Flashing

@@ -17,7 +17,7 @@ for (const required of [
   "SIGNAL SAMPLES", "Freshest nearby nodes", "Hop view",
   "/api/ultimate/status", "/api/ultimate/history", "/api/ultimate/export",
   "/api/ultimate/settings", "/api/ultimate/location", "/api/ultimate/ota",
-  "SIGNED UPDATE", "NeonPocket settings", "BATTERY TREND",
+  "SIGNED UPDATE", "NeonPocket settings", "BATTERY TREND", "ultimate-location-share",
   "LATEST DELIVERY", "Power profile", "Battery capacity", "Battery calibration offset",
 ]) {
   if (!html.includes(required)) throw new Error(`Built UI is missing ${required}`);
@@ -34,7 +34,7 @@ for (const required of [
   "async function refreshUltimate()", "function drawUltimateChart(",
   "function drawActivityBars(", "function drawMeshMap(", "function advertisedLocation(",
   'ultimateFetch("/api/ultimate/settings"', 'fetch("/api/ultimate/ota"',
-  "navigator.geolocation.getCurrentPosition", "batteryTrendMvPerHour",
+  "navigator.geolocation.getCurrentPosition", "batteryTrendMvPerHour", "advertise }),",
   "batteryRuntimeMinutes", "batteryCapacityMah", "usbHostConnected", "ultimate.delivery",
   'split("\\0", 1)',
 ]) {

@@ -10,6 +10,7 @@ on:
 
 jobs:
   test:
+    name: upstream-only-test
     if: github.repository == 'meshcore-dev/MeshCore'
     runs-on: ubuntu-latest
     steps:

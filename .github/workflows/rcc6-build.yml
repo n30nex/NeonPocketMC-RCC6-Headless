@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - codex/**
   pull_request:
     branches:
       - main
@@ -15,6 +14,7 @@ permissions:
 
 jobs:
   tests:
+    name: test
     runs-on: ubuntu-latest
     steps:
       - name: Check out exact source
@@ -128,3 +128,14 @@ jobs:
             .pio/build/${{ matrix.environment }}/bootloader.bin
             .pio/build/${{ matrix.environment }}/partitions.bin
             .pio/build/${{ matrix.environment }}/SHA256SUMS
+
+  required-firmware:
+    name: required-firmware
+    if: ${{ always() }}
+    needs: firmware
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every firmware image
+        env:
+          FIRMWARE_RESULT: ${{ needs.firmware.result }}
+        run: test "$FIRMWARE_RESULT" = success

@@ -366,7 +366,7 @@ void UltimateWebApi::handleLocation() {
   sensors.node_lat = latitude;
   sensors.node_lon = longitude;
   if (has_advertise) {
-    the_mesh.getNodePrefs()->advert_loc_policy = advertise ? ADVERT_LOC_PREFS : ADVERT_LOC_NONE;
+    the_mesh.getNodePrefs()->advert_loc_policy = advertise ? ADVERT_LOC_SHARE : ADVERT_LOC_NONE;
   }
   the_mesh.savePrefs();
   String json = F("{\"saved\":true,\"latitude\":"); json += String(latitude, 6);

@@ -33,7 +33,8 @@ required = {
     "signed OTA": "Ed25519::verify" in web and "Update.begin" in web,
     "GPS-less advert policy normalization":
         text("src/helpers/CommonCLI.cpp").count("_prefs->advert_loc_policy = ADVERT_LOC_PREFS;") >= 2 and
-        mesh.count("_prefs.advert_loc_policy = ADVERT_LOC_PREFS;") >= 2,
+        "_sensors->getLocationProvider() == NULL" in text("src/helpers/CommonCLI.cpp") and
+        mesh.count("sensors.getLocationProvider() == nullptr") >= 2,
     "location endpoint": all(value in web for value in
         ['"/api/ultimate/location"', 'extractBool(body, "advertise"',
          "advert_loc_policy = advertise ? ADVERT_LOC_PREFS : ADVERT_LOC_NONE"]),

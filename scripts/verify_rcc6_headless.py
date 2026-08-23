@@ -10,6 +10,9 @@ ui = (ROOT / "examples/companion_radio/ui-new/UltimateUIScreen.cpp").read_text(e
 ui_task = (ROOT / "examples/companion_radio/ui-new/UITask.cpp").read_text(encoding="utf-8")
 web = (ROOT / "examples/companion_radio/webui/src/app.js").read_text(encoding="utf-8")
 common_cli = (ROOT / "src/helpers/CommonCLI.cpp").read_text(encoding="utf-8")
+mesh = (ROOT / "examples/companion_radio/MyMesh.cpp").read_text(encoding="utf-8")
+share_command = common_cli.index('strcmp(command, "gps advert share")')
+gps_hardware_guard = common_cli.index("#if ENV_INCLUDE_GPS == 1", share_command)
 
 required = {
     "heltec_rcc6_headless_companion_ble": ["BLE_PIN_CODE=123456", 'NEONPOCKET_HEADLESS_MODE=\'"ble"\''],
@@ -42,11 +45,12 @@ assert 'strcpy(line, "BATTERY --")' in ui
 assert 'display.print("--")' in ui_task
 assert "ultimate.batteryMv > 0" in web
 assert '(key === "battery" && raw <= 0)' in web
-assert common_cli.index('strcmp(command, "gps advert prefs")') < \
-    common_cli.index("#if ENV_INCLUDE_GPS == 1"), \
+assert common_cli.index('strcmp(command, "gps advert prefs")') < share_command, \
     "saved-coordinate advert policy must not require physical GPS hardware"
-assert common_cli.index('strcmp(command, "gps advert share")') > \
-    common_cli.index("#if ENV_INCLUDE_GPS == 1"), \
-    "live-location advert policy must require physical GPS hardware"
+assert "_sensors->getLocationProvider() != NULL" in \
+    common_cli[share_command:gps_hardware_guard], \
+    "live-location advert policy must require an actual GPS provider"
+assert "_sensors->getLocationProvider() == NULL" in common_cli
+assert mesh.count("sensors.getLocationProvider() == nullptr") >= 2
 
 print("RCC6 headless companion contract verified")

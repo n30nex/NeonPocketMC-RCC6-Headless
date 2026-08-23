@@ -238,6 +238,12 @@ class HomeScreen : public UIScreen {
     // battery "cap"
     display.fillRect(iconX + iconWidth, iconY + (iconHeight / 4), 3, iconHeight / 2);
 
+    if (batteryMilliVolts == 0) {
+      display.setCursor(iconX + 6, iconY + 1);
+      display.print("--");
+      return;
+    }
+
     // fill the battery based on the percentage
     int fillWidth = (batteryPercentage * (iconWidth - 4)) / 100;
     display.fillRect(iconX + 2, iconY + 2, fillWidth, iconHeight - 4);
@@ -637,9 +643,14 @@ class HomeScreen : public UIScreen {
       display.drawRect(4, 38, display.width() - 8, 32);
       display.drawRect(4, 75, display.width() - 8, 34);
       display.setColor(NEON_LIGHT);
-      snprintf(tmp, sizeof(tmp), "UP %luh%02lum   BAT %umV",
-          (unsigned long)(uptime / 3600), (unsigned long)((uptime / 60) % 60),
-          (unsigned)_task->getCachedBattMilliVolts());
+      if (_task->getCachedBattMilliVolts()) {
+        snprintf(tmp, sizeof(tmp), "UP %luh%02lum   BAT %umV",
+            (unsigned long)(uptime / 3600), (unsigned long)((uptime / 60) % 60),
+            (unsigned)_task->getCachedBattMilliVolts());
+      } else {
+        snprintf(tmp, sizeof(tmp), "UP %luh%02lum   BAT --",
+            (unsigned long)(uptime / 3600), (unsigned long)((uptime / 60) % 60));
+      }
       display.setCursor(9, 43);
       display.print(tmp);
       snprintf(tmp, sizeof(tmp), "HEAP %luK   MAX %luK",
@@ -1790,6 +1801,8 @@ void UITask::loop() {
       } else if (_battery_low_warning && _cached_batt_millivolts >= 3600) {
         _battery_low_warning = false;
       }
+    } else {
+      _battery_low_warning = false;
     }
     _next_refresh = 0;
   }

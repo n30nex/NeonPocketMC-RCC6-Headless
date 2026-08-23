@@ -236,7 +236,11 @@ void UltimateUIScreen::renderHeader(DisplayDriver& display, const char* title) {
   display.print("BLE");
 #endif
   char battery[18];
-  snprintf(battery, sizeof(battery), "%umV", status.battery_mv);
+  if (status.battery_mv) {
+    snprintf(battery, sizeof(battery), "%umV", status.battery_mv);
+  } else {
+    strcpy(battery, "--");
+  }
   display.setColor(status.battery_mv && status.battery_mv <= 3450 ? NEON_RED : ultimate_lime);
   display.drawTextRightAlign(display.width() - 4, 1, battery);
   display.setColor(ultimate_blue);
@@ -424,7 +428,11 @@ void UltimateUIScreen::renderPowerRoot(DisplayDriver& display) {
   display.setTextSize(1);
   display.setColor(status.battery_mv && status.battery_mv <= 3450 ? NEON_RED : ultimate_lime);
   char line[48];
-  snprintf(line, sizeof(line), "BATTERY %.2fV", status.battery_mv / 1000.0f);
+  if (status.battery_mv) {
+    snprintf(line, sizeof(line), "BATTERY %.2fV", status.battery_mv / 1000.0f);
+  } else {
+    strcpy(line, "BATTERY --");
+  }
   display.setCursor(13, 45); display.print(line);
   display.setColor(ultimate_cyan);
   display.drawTextRightAlign(207, 45, powerProfileLabel(settings.power_profile));
@@ -1002,7 +1010,11 @@ void UltimateUIScreen::expandPhrase(const char* source) {
     char replacement[48] = {};
     size_t token_length = 0;
     if (strncmp(source, "{battery}", 9) == 0) {
-      snprintf(replacement, sizeof(replacement), "%.2fV", status.battery_mv / 1000.0f);
+      if (status.battery_mv) {
+        snprintf(replacement, sizeof(replacement), "%.2fV", status.battery_mv / 1000.0f);
+      } else {
+        strcpy(replacement, "BATTERY UNAVAILABLE");
+      }
       token_length = 9;
     } else if (strncmp(source, "{location}", 10) == 0) {
       if (prefs->node_lat != 0 || prefs->node_lon != 0) {

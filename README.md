@@ -6,7 +6,7 @@
 
 Screenless MeshCore companion firmware for the Heltec RadioCore RCC6-L62/SX1262. Choose one transport: Bluetooth, native USB/serial, or Wi-Fi Web/TCP.
 
-Current experimental release: [`v1.0.0-rc.2`](https://github.com/n30nex/NeonPocketMC-RCC6-Headless/releases/tag/v1.0.0-rc.2).
+Current experimental release: [`v1.0.0-rc.3`](https://github.com/n30nex/NeonPocketMC-RCC6-Headless/releases/tag/v1.0.0-rc.3). RC3 rejects impossible RCC6 battery readings instead of reporting them to companion clients.
 
 > **RCC6-L62 only. Do not flash RC52, RC32, T114, Heltec V3/V4, or an RCC6 with different radio hardware.**
 

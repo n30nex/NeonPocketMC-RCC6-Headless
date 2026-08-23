@@ -33,5 +33,6 @@ uint16_t HeltecRCC6Board::getBattMilliVolts() {
   raw = raw / 8;
   digitalWrite(PIN_ADC_CTRL, !ADC_CTRL_ENABLED);
 
-  return (adcMultiplier * raw);
+  const uint32_t measured = static_cast<uint32_t>(adcMultiplier * raw);
+  return measured <= 4500U ? static_cast<uint16_t>(measured) : 0;
 }

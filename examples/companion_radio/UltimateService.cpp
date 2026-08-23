@@ -739,7 +739,8 @@ void UltimateService::sampleStatus() {
   if (raw_battery) {
     const int32_t calibrated = static_cast<int32_t>(raw_battery) +
         settings.battery_calibration_mv;
-    snapshot.battery_mv = static_cast<uint16_t>(constrain(calibrated, 1, 65535));
+    snapshot.battery_mv = calibrated > 0 && calibrated <= 4500
+        ? static_cast<uint16_t>(calibrated) : 0;
   } else {
     snapshot.battery_mv = 0;
   }

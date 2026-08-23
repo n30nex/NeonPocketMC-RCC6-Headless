@@ -31,9 +31,12 @@ required = {
     "32 event queue": "pending_capacity = 32" in service,
     "64 network nodes": "network_capacity = 64" in service,
     "signed OTA": "Ed25519::verify" in web and "Update.begin" in web,
+    "GPS-less advert policy normalization":
+        text("src/helpers/CommonCLI.cpp").count("_prefs->advert_loc_policy = ADVERT_LOC_PREFS;") >= 2 and
+        mesh.count("_prefs.advert_loc_policy = ADVERT_LOC_PREFS;") >= 2,
     "location endpoint": all(value in web for value in
         ['"/api/ultimate/location"', 'extractBool(body, "advertise"',
-         "advert_loc_policy = advertise ? ADVERT_LOC_SHARE : ADVERT_LOC_NONE"]),
+         "advert_loc_policy = advertise ? ADVERT_LOC_PREFS : ADVERT_LOC_NONE"]),
     "six-area UI": all(name in ui for name in ["HOME", "INBOX", "NETWORK", "RADIO", "TOOLS", "POWER"]),
     "adaptive animation cadence": all(value in service_cpp for value in
         ["getRecommendedFrameMillis", "flush >= 45000", "flush >= 90000"]) and

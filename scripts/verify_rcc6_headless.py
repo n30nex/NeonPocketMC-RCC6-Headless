@@ -45,5 +45,8 @@ assert '(key === "battery" && raw <= 0)' in web
 assert common_cli.index('strcmp(command, "gps advert prefs")') < \
     common_cli.index("#if ENV_INCLUDE_GPS == 1"), \
     "saved-coordinate advert policy must not require physical GPS hardware"
+assert common_cli.index('strcmp(command, "gps advert share")') > \
+    common_cli.index("#if ENV_INCLUDE_GPS == 1"), \
+    "live-location advert policy must require physical GPS hardware"
 
 print("RCC6 headless companion contract verified")

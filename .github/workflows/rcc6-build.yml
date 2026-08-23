@@ -112,7 +112,7 @@ jobs:
         shell: bash
         run: |
           out=".pio/build/${{ matrix.environment }}"
-          grep -aFq 'NeonPocketMC RCC6 Headless 1.0.0-rc.3 mode=' "$out/firmware.bin"
+          grep -aFq 'NeonPocketMC RCC6 Headless 1.0.0-rc.4 mode=' "$out/firmware.bin"
 
       - name: Upload exact firmware candidate
         if: startsWith(matrix.environment, 'heltec_rcc6_headless_')

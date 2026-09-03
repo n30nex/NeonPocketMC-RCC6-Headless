@@ -17,6 +17,13 @@ constexpr char HTTP_SESSION_HEADER[] = "X-RCC6-Session";
 constexpr char HTTP_ACK_HEADER[] = "X-RCC6-Ack";
 constexpr char HTTP_SEQUENCE_HEADER[] = "X-RCC6-Seq";
 constexpr char HTTP_AUTH_USER[] = "meshcore";
+#if defined(NEONPOCKET_ULTIMATE_VERSION)
+constexpr char WEB_FIRMWARE_VERSION[] = NEONPOCKET_ULTIMATE_VERSION;
+#elif defined(NEONPOCKET_HEADLESS_VERSION)
+constexpr char WEB_FIRMWARE_VERSION[] = NEONPOCKET_HEADLESS_VERSION;
+#else
+constexpr char WEB_FIRMWARE_VERSION[] = "unknown";
+#endif
 
 bool isSafeSsidChar(char c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
@@ -711,7 +718,7 @@ void SerialWebInterface::handleHttpGetNetwork() {
   }
 
   String response;
-  response.reserve(192);
+  response.reserve(224);
   response += F("{\"mode\":\"");
   response += _station_active ? F("station") : F("ap");
   response += F("\",\"ssid\":\"");
@@ -724,6 +731,8 @@ void SerialWebInterface::handleHttpGetNetwork() {
   response += HTTP_AUTH_USER;
   response += F("\",\"loginKey\":\"");
   response += jsonEscape(_ap_password);
+  response += F("\",\"firmwareVersion\":\"");
+  response += WEB_FIRMWARE_VERSION;
   response += '"';
   response += '}';
   _http_server.sendHeader("Cache-Control", "no-store");

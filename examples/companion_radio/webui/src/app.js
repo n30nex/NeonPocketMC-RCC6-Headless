@@ -578,6 +578,7 @@ async function refreshNetworkStatus() {
       fallback: Boolean(data.fallback),
       loginUser: typeof data.loginUser === "string" ? data.loginUser : "meshcore",
       loginKey: typeof data.loginKey === "string" ? data.loginKey : "",
+      firmwareVersion: typeof data.firmwareVersion === "string" ? data.firmwareVersion : "",
     };
   } catch { /* network configuration endpoint is optional on older builds */ }
   renderNetwork();
@@ -1045,7 +1046,7 @@ function renderMore() {
   text("more-firmware", device?.firmwareVer != null ? `Protocol ${device.firmwareVer}` : "—");
   text("more-build", device?.firmware_build_date || "—");
   text("more-key", self?.publicKey ? `${hex(self.publicKey, 8)}…` : "—");
-  text("app-version", __APP_VERSION__);
+  text("app-version", state.network?.firmwareVersion || "—");
   text("library-version", __MESHCORE_JS_VERSION__);
   $("advert-button").disabled = !state.connected;
   $("clear-history-button").disabled = !state.messages.length;

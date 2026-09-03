@@ -39,7 +39,10 @@ assert "MAX_GROUP_CHANNELS=40" in common
 assert "OFFLINE_QUEUE_SIZE=256" in common
 assert "NeonPocket Headless setup password" in main
 assert all(token in serial_web for token in
-           ('\\"loginUser\\"', '\\"loginKey\\"', '"Web login: %s / %s'))
+           ('\\"loginUser\\"', '\\"loginKey\\"', '\\"firmwareVersion\\"',
+            "NEONPOCKET_ULTIMATE_VERSION", "NEONPOCKET_HEADLESS_VERSION",
+            '"Web login: %s / %s'))
+assert 'state.network?.firmwareVersion || "—"' in web
 assert "NeonPocketMC RCC6 Headless" in main
 assert "measured <= 4500U" in board
 assert "calibrated > 0 && calibrated <= 4500" in service

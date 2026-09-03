@@ -30,7 +30,7 @@ if (appSource.includes(".getWaitingMessages(")) throw new Error("Destructive bat
 for (const required of ["this.drainTask = this.drainRetainedFrames()", "if (!this.ready) throw"]) {
   if (!appSource.includes(required)) throw new Error(`Takeover drain guard is missing ${required}`);
 }
-for (const required of ["loginUser", "loginKey", "device key, not your home Wi-Fi password"]) {
+for (const required of ["loginUser", "loginKey", "firmwareVersion", "device key, not your home Wi-Fi password"]) {
   if (!appSource.includes(required)) throw new Error(`LAN login handoff is missing ${required}`);
 }
 for (const required of [

@@ -576,6 +576,8 @@ async function refreshNetworkStatus() {
       ssid: typeof data.ssid === "string" ? data.ssid : "",
       ip: typeof data.ip === "string" ? data.ip : "",
       fallback: Boolean(data.fallback),
+      loginUser: typeof data.loginUser === "string" ? data.loginUser : "meshcore",
+      loginKey: typeof data.loginKey === "string" ? data.loginKey : "",
     };
   } catch { /* network configuration endpoint is optional on older builds */ }
   renderNetwork();
@@ -619,6 +621,7 @@ async function setNetwork(fields) {
     credentials: "same-origin",
   });
   if (!response.ok) throw new Error(`Network update failed (${response.status})`);
+  return response.json();
 }
 
 async function syncAll() {
@@ -963,6 +966,8 @@ function drawSignalChart() {
 function renderNetwork() {
   const network = state.network;
   const busy = state.linkStatus === "busy";
+  text("network-login-user", network?.loginUser || "meshcore");
+  text("network-login-key", network?.loginKey || "unavailable");
   if (!network) {
     text("network-title", "Set up local Wi-Fi");
     text("network-summary", "Use your 2.4 GHz home network instead of staying on the RCC6 setup hotspot.");
@@ -1015,16 +1020,18 @@ function showNetworkResult(mode) {
   const steps = $("network-result-steps");
   steps.replaceChildren();
   const values = mode === "station"
-    ? ["Wait for RCC6 to restart.", "Reconnect this phone or computer to your home Wi-Fi.", "Read the new DHCP IP on the RCC6 TFT and open it in your browser."]
-    : ["Wait for RCC6 to restart in setup AP mode.", "Reconnect this phone or computer to the RCC6 Wi-Fi shown on the TFT.", "Open 192.168.4.1 in your browser."];
+    ? ["Wait for RCC6 to restart.", "Reconnect this phone or computer to your home Wi-Fi.", "Read the new DHCP IP and login in the USB serial console or router, then open the IP in your browser."]
+    : ["Wait for RCC6 to restart in setup AP mode.", "Reconnect to the RCC6 Wi-Fi shown in the USB serial console.", "Open 192.168.4.1 in your browser."];
   for (const value of values) steps.append(element("li", "", value));
   text("network-result-title", mode === "station" ? "Reconnect to your home Wi-Fi" : "Reconnect to the RCC6 setup AP");
   const note = $("network-result-note");
   note.replaceChildren();
   if (mode === "station") {
-    note.append("In station mode, the browser may request HTTP Basic authentication. Use username ", element("strong", "", "meshcore"), " and the 8-letter key shown on the TFT as the password.");
+    const user = state.network?.loginUser || "meshcore";
+    const key = state.network?.loginKey || "the 8-letter device key";
+    note.append("When prompted, use ", element("strong", "", `${user} / ${key}`), ". This is the device key, not your home Wi-Fi password.");
   } else {
-    note.textContent = "The TFT shows the setup Wi-Fi name and password after restart.";
+    note.textContent = "The USB serial console shows the setup Wi-Fi name and device key after restart.";
   }
 }
 
@@ -1298,7 +1305,9 @@ $("network-form").addEventListener("submit", async (event) => {
   if (passwordBytes !== 0 && (passwordBytes < 8 || passwordBytes > 64)) { toast("Password must be empty or 8–64 bytes", "error"); return $("network-password").focus(); }
   $("network-save").disabled = true;
   try {
-    await setNetwork({ mode: "station", ssid, password });
+    const result = await setNetwork({ mode: "station", ssid, password });
+    state.network = { ...state.network, loginUser: result.loginUser || "meshcore", loginKey: result.loginKey || state.network?.loginKey || "" };
+    renderNetwork();
     showNetworkResult("station");
     toast("Local Wi-Fi saved. RCC6 is restarting.", "warn");
   } catch { toast("Could not save Wi-Fi settings", "error"); }

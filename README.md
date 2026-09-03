@@ -6,7 +6,7 @@
 
 Screenless MeshCore companion firmware for the Heltec RadioCore RCC6-L62/SX1262. Choose one transport: Bluetooth, native USB/serial, or Wi-Fi Web/TCP.
 
-Current experimental release: [`v1.0.0-rc.4`](https://github.com/n30nex/NeonPocketMC-RCC6-Headless/releases/tag/v1.0.0-rc.4). RC4 fixes saved-location adverts on GPS-less hardware and retains the battery-reading safeguards.
+Current experimental release: [`v1.0.0-rc.5`](https://github.com/n30nex/NeonPocketMC-RCC6-Headless/releases/tag/v1.0.0-rc.5). RC5 makes the Wi-Fi Web login explicit through setup, restart, and USB-console recovery while retaining the saved-location and battery safeguards.
 
 > **RCC6-L62 only. Do not flash RC52, RC32, T114, Heltec V3/V4, or an RCC6 with different radio hardware.**
 
@@ -48,7 +48,8 @@ On first boot the device starts a WPA-protected setup network named `MeshCore-<n
 2. Reset the RCC6.
 3. Read the setup SSID, eight-character password, and `http://192.168.4.1/` URL from the console.
 4. Join that network, open the URL, and enter the local 2.4 GHz Wi-Fi details.
-5. After restart, the USB console prints the assigned LAN address.
+5. Save the LAN Web login shown before restart: username **`meshcore`**, password the generated eight-letter **device key**.
+6. After restart, the USB console prints the assigned LAN address and the same login. The device key is not your home Wi-Fi password.
 
 The Web interface is authenticated on the LAN. TCP port **5000** remains enabled for standard MeshCore companion clients.
 
@@ -73,7 +74,7 @@ Those existing products are reused by the NeonPocket suite; this repository does
 
 ## Build verification
 
-GitHub Actions:
+The Pi-local release checks (mirrored by GitHub Actions when available):
 
 1. runs upstream native tests;
 2. deterministically verifies the embedded WebUI;

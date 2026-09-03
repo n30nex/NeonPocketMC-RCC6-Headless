@@ -9,6 +9,7 @@ service = (ROOT / "examples/companion_radio/UltimateService.cpp").read_text(enco
 ui = (ROOT / "examples/companion_radio/ui-new/UltimateUIScreen.cpp").read_text(encoding="utf-8")
 ui_task = (ROOT / "examples/companion_radio/ui-new/UITask.cpp").read_text(encoding="utf-8")
 web = (ROOT / "examples/companion_radio/webui/src/app.js").read_text(encoding="utf-8")
+serial_web = (ROOT / "src/helpers/esp32/SerialWebInterface.cpp").read_text(encoding="utf-8")
 common_cli = (ROOT / "src/helpers/CommonCLI.cpp").read_text(encoding="utf-8")
 mesh = (ROOT / "examples/companion_radio/MyMesh.cpp").read_text(encoding="utf-8")
 share_command = common_cli.index('strcmp(command, "gps advert share")')
@@ -37,6 +38,8 @@ assert "MAX_CONTACTS=350" in common
 assert "MAX_GROUP_CHANNELS=40" in common
 assert "OFFLINE_QUEUE_SIZE=256" in common
 assert "NeonPocket Headless setup password" in main
+assert all(token in serial_web for token in
+           ('\\"loginUser\\"', '\\"loginKey\\"', '"Web login: %s / %s'))
 assert "NeonPocketMC RCC6 Headless" in main
 assert "measured <= 4500U" in board
 assert "calibrated > 0 && calibrated <= 4500" in service
